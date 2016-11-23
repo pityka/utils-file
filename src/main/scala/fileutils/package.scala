@@ -24,10 +24,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 import scala.io.Codec
 
-/**
-  * Provides classes and methods for general bionformatic applications.
-  *
-  */
 package object fileutils {
 
   import TempFile._
