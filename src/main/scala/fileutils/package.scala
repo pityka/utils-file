@@ -210,8 +210,14 @@ package object fileutils {
 
   /** Opens a [[java.io.BufferedWriter]] on the file. Closes it after the block is executed. */
   def openFileWriter[T](fileName: File, append: Boolean = false)(
-      func: BufferedWriter => T) =
+      func: BufferedWriter => T): T =
     useResource(new BufferedWriter(new FileWriter(fileName, append)))(func)
+
+  def openFileWriter[T](func: BufferedWriter => T): (File, T) = {
+    val t = TempFile.createTempFile("tmp")
+    val x = openFileWriter(t)(func)
+    (t, x)
+  }
 
   /** Opens an unbuffered [[java.io.Writer]] on the file. Closes it after the block is executed. */
   def openUnbufferedFileWriter[T](fileName: File, append: Boolean = false)(
@@ -220,9 +226,16 @@ package object fileutils {
 
   /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it after the block is executed. */
   def openFileOutputStream[T](fileName: File, append: Boolean = false)(
-      func: BufferedOutputStream => T) =
+      func: BufferedOutputStream => T): T =
     useResource(
       new BufferedOutputStream(new FileOutputStream(fileName, append)))(func)
+
+  /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it after the block is executed. */
+  def openFileOutputStream[T](func: BufferedOutputStream => T): (File, T) = {
+    val t = TempFile.createTempFile("tmp")
+    val x = openFileOutputStream(t)(func)
+    (t, x)
+  }
 
   /** Opens a buffered [[java.io.BufferedInputStream]] on the file. Closes it after the block is executed. */
   def openFileInputStream[T](fileName: File)(func: BufferedInputStream => T) =
@@ -246,18 +259,31 @@ package object fileutils {
 
   /** Opens a [[java.io.BufferedWriter]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
   def openZippedFileWriter[T](fileName: File, append: Boolean = false)(
-      func: java.io.Writer => T) =
+      func: java.io.Writer => T): T =
     useResource(
       new BufferedWriter(
         new java.io.OutputStreamWriter(new java.util.zip.GZIPOutputStream(
           new FileOutputStream(fileName, append)))))(func)
 
+  def openZippedFileWriter[T](func: java.io.Writer => T): (File, T) = {
+    val t = TempFile.createTempFile("tmp")
+    val x = openZippedFileWriter(t)(func)
+    (t, x)
+  }
+
   /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
   def openZippedFileOutputStream[T](fileName: File, append: Boolean = false)(
-      func: java.io.OutputStream => T) =
+      func: java.io.OutputStream => T): T =
     useResource(
       new java.util.zip.GZIPOutputStream(
         new FileOutputStream(fileName, append)))(func)
+
+  def openZippedFileOutputStream[T](
+      func: java.io.OutputStream => T): (File, T) = {
+    val t = TempFile.createTempFile("tmp")
+    val x = openZippedFileOutputStream(t)(func)
+    (t, x)
+  }
 
   /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
   def openZippedFileInputStream[T](fileName: File)(
