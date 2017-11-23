@@ -1,14 +1,15 @@
-version := "1.1.0"
+version := "1.1.1"
 
 organization := "io.github.pityka"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
+
+crossScalaVersions := Seq("2.11.11", "2.12.4")
 
 name := "fileutils"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.13.2" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
 
 reformatOnCompileSettings
