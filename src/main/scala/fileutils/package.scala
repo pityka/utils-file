@@ -371,9 +371,17 @@ package object fileutils {
     * @return Exit code of the process.
     */
   def exec(pb: ProcessBuilder,
-           atMost: Duration = Duration.Inf)(stdOutFunc: String => Unit = {
+           atMost: Duration = Duration.Inf,
+           retries: Int = 0)(stdOutFunc: String => Unit = {
     x: String =>
     })(implicit stdErrFunc: String => Unit = (x: String) => ()): Int = {
+
+      import scala.util._
+      def retry[A](i: Int)(f: => A): A = Try(f) match {
+    case Success(x)          => x
+    case Failure(e:java.io.IOException) if i > 0 => retry(i - 1)(f)
+    case Failure(e)          => throw e
+  }
 
     import java.util.concurrent.Executors
 
@@ -381,7 +389,7 @@ package object fileutils {
 
     implicit val ec = ExecutionContext.fromExecutorService(executorService)
 
-    val process = pb.run(ProcessLogger(stdOutFunc, stdErrFunc))
+    val process = retry(retries)(pb.run(ProcessLogger(stdOutFunc, stdErrFunc)))
 
     val hook = try {
       scala.sys.addShutdownHook { process.destroy() }
@@ -416,12 +424,13 @@ package object fileutils {
     */
   def execGetStreamsAndCode(pb: ProcessBuilder,
                             unsuccessfulOnErrorStream: Boolean = true,
-                            atMost: Duration = Duration.Inf)
+                            atMost: Duration = Duration.Inf,
+                            retries: Int = 0)
     : (List[String], List[String], Boolean) = {
     var ls: List[String] = Nil
     var lse: List[String] = Nil
     var boolean = true
-    val exitvalue = exec(pb, atMost) { ln =>
+    val exitvalue = exec(pb, atMost, retries) { ln =>
       ls = ln :: ls
     } { ln =>
       if (unsuccessfulOnErrorStream) { boolean = false }; lse = ln :: lse
@@ -443,13 +452,14 @@ package object fileutils {
   def execGetStreamsAndCodeWithLog(
       pb: ProcessBuilder,
       unsuccessfulOnErrorStream: Boolean = true,
-      atMost: Duration = Duration.Inf)(implicit log: {
+      atMost: Duration = Duration.Inf,
+      retries: Int = 0)(implicit log: {
     def info(s: String): Unit; def error(s: String): Unit
   }): (List[String], List[String], Boolean) = {
     var ls: List[String] = Nil
     var lse: List[String] = Nil
     var boolean = true
-    val exitvalue = exec(pb, atMost) { ln =>
+    val exitvalue = exec(pb, atMost, retries) { ln =>
       ls = ln :: ls; log.info(ln)
     } { ln =>
       if (unsuccessfulOnErrorStream) { boolean = false }; lse = ln :: lse;

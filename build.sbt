@@ -1,4 +1,4 @@
-version := "1.1.1"
+version := "1.2.0"
 
 organization := "io.github.pityka"
 
@@ -11,8 +11,6 @@ name := "fileutils"
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
-
-reformatOnCompileSettings
 
 pomExtra in Global := {
   <url>https://pityka.github.io/utils-file</url>
