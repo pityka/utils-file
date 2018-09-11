@@ -61,7 +61,7 @@ object TempFile {
   def getExecutableFromJar(name: String): File =
     writtenExecutables.getOrElseUpdate(name,writeFreshExecutable(name))
 
-  private def writeFreshExecutable(name: String): File = {
+  private def writeFreshExecutable(name: String): File = synchronized {
     val tmpFile = createTempFile(".executable")
     tmpFile.deleteOnExit()
     tmpFile.setExecutable(true)

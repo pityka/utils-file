@@ -1,16 +1,18 @@
-version := "1.2.0"
+version := "1.2.1"
 
 organization := "io.github.pityka"
 
-scalaVersion := "2.11.11"
+scalaVersion := "2.12.6"
 
-crossScalaVersions := Seq("2.11.11", "2.12.4")
+crossScalaVersions := Seq("2.11.11", "2.12.6")
 
 name := "fileutils"
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
+
+publishTo := sonatypePublishTo.value
 
 pomExtra in Global := {
   <url>https://pityka.github.io/utils-file</url>
