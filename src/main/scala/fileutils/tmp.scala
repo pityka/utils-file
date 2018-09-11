@@ -59,14 +59,15 @@ object TempFile {
   val writtenExecutables = scala.collection.concurrent.TrieMap[String, File]()
 
   def getExecutableFromJar(name: String): File =
-    writtenExecutables.getOrElseUpdate(name,writeFreshExecutable(name))
+    writtenExecutables.getOrElseUpdate(name, writeFreshExecutable(name))
 
   private def writeFreshExecutable(name: String): File = synchronized {
     val tmpFile = createTempFile(".executable")
     tmpFile.deleteOnExit()
     tmpFile.setExecutable(true)
 
-    val d = readStreamAndClose(getClass().getResource(name).openStream()).toArray
+    val d =
+      readStreamAndClose(getClass().getResource(name).openStream()).toArray
     writeBinaryToFile(tmpFile.getAbsolutePath, d)
     tmpFile
 

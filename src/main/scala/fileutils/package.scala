@@ -372,16 +372,15 @@ package object fileutils {
     */
   def exec(pb: ProcessBuilder,
            atMost: Duration = Duration.Inf,
-           retries: Int = 0)(stdOutFunc: String => Unit = {
-    x: String =>
+           retries: Int = 0)(stdOutFunc: String => Unit = { x: String =>
     })(implicit stdErrFunc: String => Unit = (x: String) => ()): Int = {
 
-      import scala.util._
-      def retry[A](i: Int)(f: => A): A = Try(f) match {
-    case Success(x)          => x
-    case Failure(e:java.io.IOException) if i > 0 => retry(i - 1)(f)
-    case Failure(e)          => throw e
-  }
+    import scala.util._
+    def retry[A](i: Int)(f: => A): A = Try(f) match {
+      case Success(x)                               => x
+      case Failure(e: java.io.IOException) if i > 0 => retry(i - 1)(f)
+      case Failure(e)                               => throw e
+    }
 
     import java.util.concurrent.Executors
 
@@ -422,11 +421,11 @@ package object fileutils {
     * @param atMost max waiting time.
     * @return (stdout,stderr,success) triples
     */
-  def execGetStreamsAndCode(pb: ProcessBuilder,
-                            unsuccessfulOnErrorStream: Boolean = true,
-                            atMost: Duration = Duration.Inf,
-                            retries: Int = 0)
-    : (List[String], List[String], Boolean) = {
+  def execGetStreamsAndCode(
+      pb: ProcessBuilder,
+      unsuccessfulOnErrorStream: Boolean = true,
+      atMost: Duration = Duration.Inf,
+      retries: Int = 0): (List[String], List[String], Boolean) = {
     var ls: List[String] = Nil
     var lse: List[String] = Nil
     var boolean = true
@@ -449,11 +448,10 @@ package object fileutils {
     * @param log A logger.
     * @return (stdout,stderr,success) triples
     */
-  def execGetStreamsAndCodeWithLog(
-      pb: ProcessBuilder,
-      unsuccessfulOnErrorStream: Boolean = true,
-      atMost: Duration = Duration.Inf,
-      retries: Int = 0)(implicit log: {
+  def execGetStreamsAndCodeWithLog(pb: ProcessBuilder,
+                                   unsuccessfulOnErrorStream: Boolean = true,
+                                   atMost: Duration = Duration.Inf,
+                                   retries: Int = 0)(implicit log: {
     def info(s: String): Unit; def error(s: String): Unit
   }): (List[String], List[String], Boolean) = {
     var ls: List[String] = Nil

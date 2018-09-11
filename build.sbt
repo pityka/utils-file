@@ -35,3 +35,5 @@ pomExtra in Global := {
     </developer>
   </developers>
 }
+
+scalafmtOnCompile in ThisBuild := true
