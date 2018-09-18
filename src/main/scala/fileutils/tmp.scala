@@ -49,6 +49,13 @@ object TempFile {
   def createTempFile(suffix: String): File =
     File.createTempFile(prefix, suffix, folder)
 
+  def createTempFolder(suffix: String): File = {
+    val file = File.createTempFile(prefix, suffix, folder)
+    file.delete
+    file.mkdir
+    file
+  }
+
   def createFileInTempFolderIfPossibleWithName(fileName: String): File = {
     val f = new File(folder, fileName)
     val success = f.createNewFile
