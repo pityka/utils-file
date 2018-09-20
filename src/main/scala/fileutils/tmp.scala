@@ -76,13 +76,19 @@ object TempFile {
   private def writeFreshExecutable(resourceName: String,
                                    fileName: Option[String]): File =
     synchronized {
-      val tmpFile = createTempFile("." + fileName.getOrElse("executable"))
-      tmpFile.deleteOnExit()
-      tmpFile.setExecutable(true)
+      val tmpFile = fileName match {
+        case None => createTempFile(".executable")
+        case Some(fileName) =>
+          new File(createTempFolder("bin"), fileName)
+      }
 
       val d =
         readStreamAndClose(getClass().getResource(resourceName).openStream()).toArray
       writeBinaryToFile(tmpFile.getAbsolutePath, d)
+
+      tmpFile.deleteOnExit()
+      tmpFile.setExecutable(true)
+
       tmpFile
 
     }
