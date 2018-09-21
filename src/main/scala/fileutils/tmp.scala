@@ -82,9 +82,18 @@ object TempFile {
           new File(createTempFolder("bin"), fileName)
       }
 
-      val d =
-        readStreamAndClose(getClass().getResource(resourceName).openStream()).toArray
-      writeBinaryToFile(tmpFile.getAbsolutePath, d)
+      val inputStream = new java.io.BufferedInputStream(
+        getClass().getResource(resourceName).openStream())
+      try {
+        val buffer = Array.ofDim[Byte](8096)
+        openFileOutputStream(tmpFile) { os =>
+          var c = inputStream.read(buffer, 0, buffer.length)
+          while (c >= 0) {
+            os.write(buffer, 0, c)
+            c = inputStream.read(buffer, 0, buffer.length)
+          }
+        }
+      } finally { inputStream.close }
 
       tmpFile.deleteOnExit()
       tmpFile.setExecutable(true)
