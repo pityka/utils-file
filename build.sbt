@@ -1,18 +1,23 @@
-version := "1.2.3-SNAPSHOT"
+version := "1.2.3"
 
 organization := "io.github.pityka"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.13.5"
 
-crossScalaVersions := Seq("2.11.11", "2.12.6")
+crossScalaVersions := Seq("2.12.13")
 
 name := "fileutils"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.5" % "test"
 )
 
 publishTo := sonatypePublishTo.value
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature"
+)
 
 pomExtra in Global := {
   <url>https://pityka.github.io/utils-file</url>

@@ -24,6 +24,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 import scala.io.Codec
 
+import scala.language.reflectiveCalls
+import scala.language.implicitConversions
+
 package object fileutils {
 
   import TempFile._
@@ -35,8 +38,7 @@ package object fileutils {
       .split(java.util.regex.Pattern.quote(File.pathSeparator))
       .exists(f => new File(f, fileName).canRead)
 
-  /**
-    * Creates symbolic links with the same basename but different extensions.
+  /** Creates symbolic links with the same basename but different extensions.
     *
     * @param filesWithExtensions files with the needed extensions
     * @return A temporary File which points to the common part of the symbolic links paths.
@@ -63,8 +65,7 @@ package object fileutils {
     from
   }
 
-  /**
-    * Returns the result of the block, and closes the resource.
+  /** Returns the result of the block, and closes the resource.
     *
     * @param param closeable resource
     * @param f block using the resource
@@ -77,15 +78,15 @@ package object fileutils {
   /** Alias for [[useResource]] */
   def using[A <: { def close(): Unit }, B] = useResource[A, B] _
 
-  def readLines(s: String): Vector[String] = openSource(s)(_.getLines.toVector)
+  def readLines(s: String): Vector[String] =
+    openSource(s)(_.getLines().toVector)
   def readLines(s: File): Vector[String] = readLines(s.getAbsolutePath)
 
   def openFileInputStreamMaybeZipped[T](file: File)(func: InputStream => T) =
     if (isGZipFile(file.getAbsolutePath)) openZippedFileInputStream(file)(func)
     else openFileInputStream(file)(func)
 
-  /**
-    * Opens a [[scala.io.Source]], executes the block, then closes the source.
+  /** Opens a [[scala.io.Source]], executes the block, then closes the source.
     *
     * @param s Path of the file
     */
@@ -97,8 +98,7 @@ package object fileutils {
     if (isGZipFile(s)) createSourceFromZippedFile(s.getAbsolutePath)(codec)
     else scala.io.Source.fromFile(s)(codec)
 
-  /**
-    * Opens a [[scala.io.Source]], executes the block, then closes the source.
+  /** Opens a [[scala.io.Source]], executes the block, then closes the source.
     *
     * @param s Path of the file
     */
@@ -106,12 +106,14 @@ package object fileutils {
     openSource(s.getAbsolutePath)(f)(codec)
 
   /** Returns a [[scala.io.Source]] from the given GZipped file. */
-  def createSourceFromZippedFile(file: String,
-                                 bufferSize: Int = io.Source.DefaultBufSize)(
-      implicit codec: io.Codec): io.BufferedSource = {
+  def createSourceFromZippedFile(
+      file: String,
+      bufferSize: Int = io.Source.DefaultBufSize
+  )(implicit codec: io.Codec): io.BufferedSource = {
     val inputStream = new BufferedInputStream(
       new GZIPInputStream(new FileInputStream(file), 65536 * 32),
-      65536 * 32)
+      65536 * 32
+    )
 
     io.Source.createBufferedSource(
       inputStream,
@@ -126,14 +128,17 @@ package object fileutils {
     scala.util
       .Try(
         new java.util.zip.GZIPInputStream(
-          new java.io.FileInputStream(new java.io.File(file))))
+          new java.io.FileInputStream(new java.io.File(file))
+        )
+      )
       .isSuccess
 
   /** Returns true if the file is GZipped. */
   def isGZipFile(file: File): Boolean = isGZipFile(file.getAbsolutePath)
 
   private[this] def openZippedSource[A](s: String)(f: io.Source => A)(
-      codec: Codec) =
+      codec: Codec
+  ) =
     useResource(createSourceFromZippedFile(s)(codec))(f)
 
   /** Writes text data to file. */
@@ -183,8 +188,7 @@ package object fileutils {
   def writeByteBufferToFile(file: File, buff: java.nio.ByteBuffer): Unit =
     writeByteBufferToFile(file.getAbsolutePath, buff)
 
-  /**
-    * Appends text to file.
+  /** Appends text to file.
     * Opens a new [[java.io.FileWriter]] on every call.
     */
   def appendToFile(fileName: String, textData: String): Unit =
@@ -192,8 +196,7 @@ package object fileutils {
       writer.write(textData)
     }
 
-  /**
-    * Appends text to file.
+  /** Appends text to file.
     * Opens a new [[java.io.FileWriter]] on every call.
     */
   def appendToFile(file: File, data: String): Unit =
@@ -210,7 +213,8 @@ package object fileutils {
 
   /** Opens a [[java.io.BufferedWriter]] on the file. Closes it after the block is executed. */
   def openFileWriter[T](fileName: File, append: Boolean = false)(
-      func: BufferedWriter => T): T =
+      func: BufferedWriter => T
+  ): T =
     useResource(new BufferedWriter(new FileWriter(fileName, append)))(func)
 
   def openFileWriter[T](func: BufferedWriter => T): (File, T) = {
@@ -221,14 +225,17 @@ package object fileutils {
 
   /** Opens an unbuffered [[java.io.Writer]] on the file. Closes it after the block is executed. */
   def openUnbufferedFileWriter[T](fileName: File, append: Boolean = false)(
-      func: java.io.Writer => T) =
+      func: java.io.Writer => T
+  ) =
     useResource(new FileWriter(fileName, append))(func)
 
   /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it after the block is executed. */
   def openFileOutputStream[T](fileName: File, append: Boolean = false)(
-      func: BufferedOutputStream => T): T =
+      func: BufferedOutputStream => T
+  ): T =
     useResource(
-      new BufferedOutputStream(new FileOutputStream(fileName, append)))(func)
+      new BufferedOutputStream(new FileOutputStream(fileName, append))
+    )(func)
 
   /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it after the block is executed. */
   def openFileOutputStream[T](func: BufferedOutputStream => T): (File, T) = {
@@ -252,18 +259,29 @@ package object fileutils {
   def openZippedFileReader[T](fileName: File)(func: BufferedReader => T): T = {
     useResource(
       new BufferedReader(
-        new java.io.InputStreamReader(new BufferedInputStream(
-          new GZIPInputStream(new FileInputStream(fileName), 65536),
-          65536))))(func)
+        new java.io.InputStreamReader(
+          new BufferedInputStream(
+            new GZIPInputStream(new FileInputStream(fileName), 65536),
+            65536
+          )
+        )
+      )
+    )(func)
   }
 
   /** Opens a [[java.io.BufferedWriter]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
   def openZippedFileWriter[T](fileName: File, append: Boolean = false)(
-      func: java.io.Writer => T): T =
+      func: java.io.Writer => T
+  ): T =
     useResource(
       new BufferedWriter(
-        new java.io.OutputStreamWriter(new java.util.zip.GZIPOutputStream(
-          new FileOutputStream(fileName, append)))))(func)
+        new java.io.OutputStreamWriter(
+          new java.util.zip.GZIPOutputStream(
+            new FileOutputStream(fileName, append)
+          )
+        )
+      )
+    )(func)
 
   def openZippedFileWriter[T](func: java.io.Writer => T): (File, T) = {
     val t = TempFile.createTempFile("tmp")
@@ -273,23 +291,27 @@ package object fileutils {
 
   /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
   def openZippedFileOutputStream[T](fileName: File, append: Boolean = false)(
-      func: java.io.OutputStream => T): T =
+      func: java.io.OutputStream => T
+  ): T =
     useResource(
-      new java.util.zip.GZIPOutputStream(
-        new FileOutputStream(fileName, append)))(func)
+      new java.util.zip.GZIPOutputStream(new FileOutputStream(fileName, append))
+    )(func)
 
   def openZippedFileOutputStream[T](
-      func: java.io.OutputStream => T): (File, T) = {
+      func: java.io.OutputStream => T
+  ): (File, T) = {
     val t = TempFile.createTempFile("tmp")
     val x = openZippedFileOutputStream(t)(func)
     (t, x)
   }
 
   /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
-  def openZippedFileInputStream[T](fileName: File)(
-      func: java.io.InputStream => T) =
+  def openZippedFileInputStream[T](
+      fileName: File
+  )(func: java.io.InputStream => T) =
     useResource(
-      new java.util.zip.GZIPInputStream(new FileInputStream(fileName)))(func)
+      new java.util.zip.GZIPInputStream(new FileInputStream(fileName))
+    )(func)
 
   /** Returns a [[java.io.BufferedReader]]. */
   def getFileReader(fileName: File) =
@@ -306,8 +328,7 @@ package object fileutils {
     }
   }
 
-  /**
-    * Returns an iterator on the InputStream's data.
+  /** Returns an iterator on the InputStream's data.
     *
     * Closes the stream when read through.
     */
@@ -316,7 +337,7 @@ package object fileutils {
 
     def hasNext = s != -1
 
-    def next = {
+    def next() = {
       var x = s.toByte; s = is.read; if (!hasNext) { is.close() }; x
     }
   }
@@ -326,8 +347,9 @@ package object fileutils {
 
   /** Reads file contents into a bytearray. */
   def readBinaryStream(f: java.io.InputStream): Array[Byte] = {
-    def read(x: scala.collection.mutable.ArrayBuffer[Byte])
-      : scala.collection.mutable.ArrayBuffer[Byte] = {
+    def read(
+        x: scala.collection.mutable.ArrayBuffer[Byte]
+    ): scala.collection.mutable.ArrayBuffer[Byte] = {
       val raw = f.read
       val ch: Byte = raw.toByte
       if (raw != -1) {
@@ -341,12 +363,12 @@ package object fileutils {
   }
 
   /** Concatenates text files together, dropping header lines for each, except the first. */
-  def cat(in: Iterable[File], out: File, header: Int = 0) {
+  def cat(in: Iterable[File], out: File, header: Int = 0) = {
     var skip = 0
     openFileWriter(out, false) { writer =>
       in.foreach { f =>
         openSource(f.getAbsolutePath) {
-          _.getLines.drop(skip).foreach { line =>
+          _.getLines().drop(skip).foreach { line =>
             writer.write(line)
             writer.write('\n')
           }
@@ -361,8 +383,7 @@ package object fileutils {
   implicit def stringSeqToProcess(command: Seq[String]): ProcessBuilder =
     Process(command)
 
-  /**
-    * Execute command with user function to process each line of output.
+  /** Execute command with user function to process each line of output.
     *
     * Based on from http://www.jroller.com/thebugslayer/entry/executing_external_system_commands_in
     * Creates 3 new threads: one for the stdout, one for the stderror, and one waits for the exit code.
@@ -370,10 +391,14 @@ package object fileutils {
     * @param atMost Maximum time to wait for the process to complete. Default infinite.
     * @return Exit code of the process.
     */
-  def exec(pb: ProcessBuilder,
-           atMost: Duration = Duration.Inf,
-           retries: Int = 0)(stdOutFunc: String => Unit = { x: String =>
-    })(implicit stdErrFunc: String => Unit = (x: String) => ()): Int = {
+  def exec(
+      pb: ProcessBuilder,
+      atMost: Duration = Duration.Inf,
+      retries: Int = 0
+  )(
+      stdOutFunc: String => Unit = { x: String =>
+        }
+  )(implicit stdErrFunc: String => Unit = (x: String) => ()): Int = {
 
     import scala.util._
     def retry[A](i: Int)(f: => A): A = Try(f) match {
@@ -390,29 +415,29 @@ package object fileutils {
 
     val process = retry(retries)(pb.run(ProcessLogger(stdOutFunc, stdErrFunc)))
 
-    val hook = try {
-      scala.sys.addShutdownHook { process.destroy() }
-    } catch {
-      case x: Throwable => {
-        Try(process.destroy)
-        Try(executorService.shutdownNow)
-        throw x
+    val hook =
+      try {
+        scala.sys.addShutdownHook { process.destroy() }
+      } catch {
+        case x: Throwable => {
+          Try(process.destroy())
+          Try(executorService.shutdownNow)
+          throw x
+        }
       }
-    }
 
     try {
-      val f = Future { process.exitValue }
+      val f = Future { process.exitValue() }
       Await.result(f, atMost = atMost)
     } finally {
-      Try(process.destroy)
+      Try(process.destroy())
       Try(executorService.shutdownNow)
-      Try(hook.remove)
+      Try(hook.remove())
 
     }
   }
 
-  /**
-    * Execute command. Returns stdout and stderr as strings, and true if it was successful.
+  /** Execute command. Returns stdout and stderr as strings, and true if it was successful.
     *
     * A process is considered successful if its exit code is 0 and the error stream is empty.
     * The latter criterion can be disabled with the unsuccessfulOnErrorStream parameter.
@@ -425,7 +450,8 @@ package object fileutils {
       pb: ProcessBuilder,
       unsuccessfulOnErrorStream: Boolean = true,
       atMost: Duration = Duration.Inf,
-      retries: Int = 0): (List[String], List[String], Boolean) = {
+      retries: Int = 0
+  ): (List[String], List[String], Boolean) = {
     var ls: List[String] = Nil
     var lse: List[String] = Nil
     var boolean = true
@@ -437,8 +463,7 @@ package object fileutils {
     (ls.reverse, lse.reverse, boolean && (exitvalue == 0))
   }
 
-  /**
-    * Execute command. Returns stdout and stderr as strings, and true if it was successful. Also writes to log.
+  /** Execute command. Returns stdout and stderr as strings, and true if it was successful. Also writes to log.
     *
     * A process is considered successful if its exit code is 0 and the error stream is empty.
     * The latter criterion can be disabled with the unsuccessfulOnErrorStream parameter.
@@ -448,12 +473,15 @@ package object fileutils {
     * @param log A logger.
     * @return (stdout,stderr,success) triples
     */
-  def execGetStreamsAndCodeWithLog(pb: ProcessBuilder,
-                                   unsuccessfulOnErrorStream: Boolean = true,
-                                   atMost: Duration = Duration.Inf,
-                                   retries: Int = 0)(implicit log: {
-    def info(s: String): Unit; def error(s: String): Unit
-  }): (List[String], List[String], Boolean) = {
+  def execGetStreamsAndCodeWithLog(
+      pb: ProcessBuilder,
+      unsuccessfulOnErrorStream: Boolean = true,
+      atMost: Duration = Duration.Inf,
+      retries: Int = 0
+  )(implicit
+    log: {
+      def info(s: String): Unit; def error(s: String): Unit
+    }): (List[String], List[String], Boolean) = {
     var ls: List[String] = Nil
     var lse: List[String] = Nil
     var boolean = true

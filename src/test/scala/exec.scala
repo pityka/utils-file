@@ -1,5 +1,6 @@
 package fileutils
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.{AnyFunSuite => FunSuite}
+import scala.language.postfixOps
 
 class ExecTestSuite extends FunSuite {
 
@@ -9,7 +10,8 @@ class ExecTestSuite extends FunSuite {
     intercept[java.util.concurrent.TimeoutException](
       exec("sleep 5000", atMost = 1 milliseconds) { ln =>
         l = ln :: l
-      }())
+      }()
+    )
   }
 
   test("plain echo") {
@@ -56,7 +58,8 @@ class ExecTestSuite extends FunSuite {
     }
     assertResult(List("a", "b")) { l2.reverse }
     assertResult(
-      List("sh: dfds: command not found", "sh: asdf: command not found")) {
+      List("sh: dfds: command not found", "sh: asdf: command not found")
+    ) {
       l.reverse
     }
   }
