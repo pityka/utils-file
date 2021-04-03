@@ -31,11 +31,10 @@ class ExecTestSuite extends FunSuite {
 
   test("stderr") {
     var l = List[String]()
-    val b = exec(List("sh", "sdfsda")) { ln =>
-      } { ln =>
+    val b = exec(List("sh", "sdfsda")) { ln => } { ln =>
       l = ln :: l
     }
-    assertResult(List("sh: sdfsda: No such file or directory")) { l }
+    assert(l.nonEmpty && l.head.contains("sdfsda"))
     assertResult(127) { b }
   }
 
@@ -57,11 +56,10 @@ class ExecTestSuite extends FunSuite {
       l = ln :: l
     }
     assertResult(List("a", "b")) { l2.reverse }
-    assertResult(
-      List("sh: dfds: command not found", "sh: asdf: command not found")
-    ) {
-      l.reverse
-    }
+    assert(
+      l.size == 2 && l.reverse.head
+        .contains("dfds") && l.reverse(1).contains("asdf")
+    )
   }
 
 }
