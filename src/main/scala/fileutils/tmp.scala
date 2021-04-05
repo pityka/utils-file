@@ -26,9 +26,11 @@ object TempFile {
       x.deleteOnExit
       x
     } else {
-      throw new IllegalStateException("Failed to create directory within "
-        + TEMP_DIR_ATTEMPTS + " attempts (tried "
-        + baseDir.getAbsolutePath + "/" + baseName + "0 to " + baseName + (TEMP_DIR_ATTEMPTS - 1) + ')');
+      throw new IllegalStateException(
+        "Failed to create directory within "
+          + TEMP_DIR_ATTEMPTS + " attempts (tried "
+          + baseDir.getAbsolutePath + "/" + baseName + "0 to " + baseName + (TEMP_DIR_ATTEMPTS - 1) + ')'
+      );
 
     }
 
@@ -71,10 +73,13 @@ object TempFile {
   def getExecutableFromJar(resourceName: String, fileName: String): File =
     writtenExecutables.getOrElseUpdate(
       resourceName,
-      writeFreshExecutable(resourceName, Some(fileName)))
+      writeFreshExecutable(resourceName, Some(fileName))
+    )
 
-  private def writeFreshExecutable(resourceName: String,
-                                   fileName: Option[String]): File =
+  private def writeFreshExecutable(
+      resourceName: String,
+      fileName: Option[String]
+  ): File =
     synchronized {
       val tmpFile = fileName match {
         case None => createTempFile(".executable")
@@ -83,7 +88,8 @@ object TempFile {
       }
 
       val inputStream = new java.io.BufferedInputStream(
-        getClass().getResource(resourceName).openStream())
+        getClass().getResource(resourceName).openStream()
+      )
       try {
         val buffer = Array.ofDim[Byte](8096)
         openFileOutputStream(tmpFile) { os =>

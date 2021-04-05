@@ -47,11 +47,10 @@ package object fileutils {
 
     val tmp = createTempFile("common")
 
-    filesWithExtensions.foreach {
-      case (file, ext) =>
-        val filepath = java.nio.file.Paths.get(file.getCanonicalPath)
-        val filelinkpath = java.nio.file.Paths.get(tmp.getCanonicalPath + ext)
-        java.nio.file.Files.createSymbolicLink(filelinkpath, filepath)
+    filesWithExtensions.foreach { case (file, ext) =>
+      val filepath = java.nio.file.Paths.get(file.getCanonicalPath)
+      val filelinkpath = java.nio.file.Paths.get(tmp.getCanonicalPath + ext)
+      java.nio.file.Files.createSymbolicLink(filelinkpath, filepath)
     }
 
     tmp
@@ -71,7 +70,8 @@ package object fileutils {
     * @param f block using the resource
     */
   def useResource[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
-    try { f(param) } finally {
+    try { f(param) }
+    finally {
       param.close()
     }
 
@@ -396,8 +396,7 @@ package object fileutils {
       atMost: Duration = Duration.Inf,
       retries: Int = 0
   )(
-      stdOutFunc: String => Unit = { x: String =>
-        }
+      stdOutFunc: String => Unit = { x: String => }
   )(implicit stdErrFunc: String => Unit = (x: String) => ()): Int = {
 
     import scala.util._
@@ -479,9 +478,10 @@ package object fileutils {
       atMost: Duration = Duration.Inf,
       retries: Int = 0
   )(implicit
-    log: {
-      def info(s: String): Unit; def error(s: String): Unit
-    }): (List[String], List[String], Boolean) = {
+      log: {
+        def info(s: String): Unit; def error(s: String): Unit
+      }
+  ): (List[String], List[String], Boolean) = {
     var ls: List[String] = Nil
     var lse: List[String] = Nil
     var boolean = true
