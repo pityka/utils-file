@@ -28,3 +28,5 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-feature"
 )
+
+mimaPreviousArtifacts := Set(organization.value %% moduleName.value % "1.2.5")
