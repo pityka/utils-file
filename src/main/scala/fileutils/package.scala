@@ -40,8 +40,11 @@ package object fileutils {
 
   /** Creates symbolic links with the same basename but different extensions.
     *
-    * @param filesWithExtensions files with the needed extensions
-    * @return A temporary File which points to the common part of the symbolic links paths.
+    * @param filesWithExtensions
+    *   files with the needed extensions
+    * @return
+    *   A temporary File which points to the common part of the symbolic links
+    *   paths.
     */
   def putBesides(filesWithExtensions: (File, String)*): File = {
 
@@ -66,8 +69,10 @@ package object fileutils {
 
   /** Returns the result of the block, and closes the resource.
     *
-    * @param param closeable resource
-    * @param f block using the resource
+    * @param param
+    *   closeable resource
+    * @param f
+    *   block using the resource
     */
   def useResource[A <: { def close(): Unit }, B](param: A)(f: A => B): B =
     try { f(param) }
@@ -88,7 +93,8 @@ package object fileutils {
 
   /** Opens a [[scala.io.Source]], executes the block, then closes the source.
     *
-    * @param s Path of the file
+    * @param s
+    *   Path of the file
     */
   def openSource[A](s: String)(f: io.Source => A)(implicit codec: Codec): A =
     if (isGZipFile(s)) openZippedSource(s)(f)(codec)
@@ -100,7 +106,8 @@ package object fileutils {
 
   /** Opens a [[scala.io.Source]], executes the block, then closes the source.
     *
-    * @param s Path of the file
+    * @param s
+    *   Path of the file
     */
   def openSource[A](s: File)(f: io.Source => A)(implicit codec: Codec): A =
     openSource(s.getAbsolutePath)(f)(codec)
@@ -188,16 +195,14 @@ package object fileutils {
   def writeByteBufferToFile(file: File, buff: java.nio.ByteBuffer): Unit =
     writeByteBufferToFile(file.getAbsolutePath, buff)
 
-  /** Appends text to file.
-    * Opens a new [[java.io.FileWriter]] on every call.
+  /** Appends text to file. Opens a new [[java.io.FileWriter]] on every call.
     */
   def appendToFile(fileName: String, textData: String): Unit =
     useResource(new BufferedWriter(new FileWriter(fileName, true))) { writer =>
       writer.write(textData)
     }
 
-  /** Appends text to file.
-    * Opens a new [[java.io.FileWriter]] on every call.
+  /** Appends text to file. Opens a new [[java.io.FileWriter]] on every call.
     */
   def appendToFile(file: File, data: String): Unit =
     appendToFile(file.getAbsolutePath, data)
@@ -211,7 +216,9 @@ package object fileutils {
     b == -1
   }
 
-  /** Opens a [[java.io.BufferedWriter]] on the file. Closes it after the block is executed. */
+  /** Opens a [[java.io.BufferedWriter]] on the file. Closes it after the block
+    * is executed.
+    */
   def openFileWriter[T](fileName: File, append: Boolean = false)(
       func: BufferedWriter => T
   ): T =
@@ -223,13 +230,17 @@ package object fileutils {
     (t, x)
   }
 
-  /** Opens an unbuffered [[java.io.Writer]] on the file. Closes it after the block is executed. */
+  /** Opens an unbuffered [[java.io.Writer]] on the file. Closes it after the
+    * block is executed.
+    */
   def openUnbufferedFileWriter[T](fileName: File, append: Boolean = false)(
       func: java.io.Writer => T
   ) =
     useResource(new FileWriter(fileName, append))(func)
 
-  /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it after the block is executed. */
+  /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it
+    * after the block is executed.
+    */
   def openFileOutputStream[T](fileName: File, append: Boolean = false)(
       func: BufferedOutputStream => T
   ): T =
@@ -237,25 +248,33 @@ package object fileutils {
       new BufferedOutputStream(new FileOutputStream(fileName, append))
     )(func)
 
-  /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it after the block is executed. */
+  /** Opens a buffered [[java.io.BufferedOutputStream]] on the file. Closes it
+    * after the block is executed.
+    */
   def openFileOutputStream[T](func: BufferedOutputStream => T): (File, T) = {
     val t = TempFile.createTempFile("tmp")
     val x = openFileOutputStream(t)(func)
     (t, x)
   }
 
-  /** Opens a buffered [[java.io.BufferedInputStream]] on the file. Closes it after the block is executed. */
+  /** Opens a buffered [[java.io.BufferedInputStream]] on the file. Closes it
+    * after the block is executed.
+    */
   def openFileInputStream[T](fileName: File)(func: BufferedInputStream => T) =
     useResource(new BufferedInputStream(new FileInputStream(fileName)))(func)
 
-  /** Opens a buffered [[java.io.BufferedReader]] on the file. Closes it after the block is executed. */
+  /** Opens a buffered [[java.io.BufferedReader]] on the file. Closes it after
+    * the block is executed.
+    */
   def openFileReader[T](fileName: File)(func: BufferedReader => T): T = {
     if (isGZipFile(fileName.getAbsolutePath))
       openZippedFileReader(fileName)(func)
     else useResource(new BufferedReader(new FileReader(fileName)))(func)
   }
 
-  /** Opens a [[java.io.BufferedReader]] on a GZipped file. Closes it after the block is executed. */
+  /** Opens a [[java.io.BufferedReader]] on a GZipped file. Closes it after the
+    * block is executed.
+    */
   def openZippedFileReader[T](fileName: File)(func: BufferedReader => T): T = {
     useResource(
       new BufferedReader(
@@ -269,7 +288,9 @@ package object fileutils {
     )(func)
   }
 
-  /** Opens a [[java.io.BufferedWriter]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
+  /** Opens a [[java.io.BufferedWriter]] which writes GZip compressed data to
+    * the given path. Closes it after the block is executed.
+    */
   def openZippedFileWriter[T](fileName: File, append: Boolean = false)(
       func: java.io.Writer => T
   ): T =
@@ -289,7 +310,9 @@ package object fileutils {
     (t, x)
   }
 
-  /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
+  /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the
+    * given path. Closes it after the block is executed.
+    */
   def openZippedFileOutputStream[T](fileName: File, append: Boolean = false)(
       func: java.io.OutputStream => T
   ): T =
@@ -305,7 +328,9 @@ package object fileutils {
     (t, x)
   }
 
-  /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the given path. Closes it after the block is executed. */
+  /** Opens a [[java.io.OutputStream]] which writes GZip compressed data to the
+    * given path. Closes it after the block is executed.
+    */
   def openZippedFileInputStream[T](
       fileName: File
   )(func: java.io.InputStream => T) =
@@ -362,7 +387,9 @@ package object fileutils {
     read(scala.collection.mutable.ArrayBuffer[Byte]()).toArray
   }
 
-  /** Concatenates text files together, dropping header lines for each, except the first. */
+  /** Concatenates text files together, dropping header lines for each, except
+    * the first.
+    */
   def cat(in: Iterable[File], out: File, header: Int = 0) = {
     var skip = 0
     openFileWriter(out, false) { writer =>
@@ -385,11 +412,16 @@ package object fileutils {
 
   /** Execute command with user function to process each line of output.
     *
-    * Based on from http://www.jroller.com/thebugslayer/entry/executing_external_system_commands_in
-    * Creates 3 new threads: one for the stdout, one for the stderror, and one waits for the exit code.
-    * @param pb Description of the executable process
-    * @param atMost Maximum time to wait for the process to complete. Default infinite.
-    * @return Exit code of the process.
+    * Based on from
+    * http://www.jroller.com/thebugslayer/entry/executing_external_system_commands_in
+    * Creates 3 new threads: one for the stdout, one for the stderror, and one
+    * waits for the exit code.
+    * @param pb
+    *   Description of the executable process
+    * @param atMost
+    *   Maximum time to wait for the process to complete. Default infinite.
+    * @return
+    *   Exit code of the process.
     */
   def exec(
       pb: ProcessBuilder,
@@ -436,14 +468,21 @@ package object fileutils {
     }
   }
 
-  /** Execute command. Returns stdout and stderr as strings, and true if it was successful.
+  /** Execute command. Returns stdout and stderr as strings, and true if it was
+    * successful.
     *
-    * A process is considered successful if its exit code is 0 and the error stream is empty.
-    * The latter criterion can be disabled with the unsuccessfulOnErrorStream parameter.
-    * @param pb The process description.
-    * @param unsuccessfulOnErrorStream if true, then the process is considered as a failure if its stderr is not empty.
-    * @param atMost max waiting time.
-    * @return (stdout,stderr,success) triples
+    * A process is considered successful if its exit code is 0 and the error
+    * stream is empty. The latter criterion can be disabled with the
+    * unsuccessfulOnErrorStream parameter.
+    * @param pb
+    *   The process description.
+    * @param unsuccessfulOnErrorStream
+    *   if true, then the process is considered as a failure if its stderr is
+    *   not empty.
+    * @param atMost
+    *   max waiting time.
+    * @return
+    *   (stdout,stderr,success) triples
     */
   def execGetStreamsAndCode(
       pb: ProcessBuilder,
@@ -462,15 +501,23 @@ package object fileutils {
     (ls.reverse, lse.reverse, boolean && (exitvalue == 0))
   }
 
-  /** Execute command. Returns stdout and stderr as strings, and true if it was successful. Also writes to log.
+  /** Execute command. Returns stdout and stderr as strings, and true if it was
+    * successful. Also writes to log.
     *
-    * A process is considered successful if its exit code is 0 and the error stream is empty.
-    * The latter criterion can be disabled with the unsuccessfulOnErrorStream parameter.
-    * @param pb The process description.
-    * @param unsuccessfulOnErrorStream if true, then the process is considered as a failure if its stderr is not empty.
-    * @param atMost max waiting time.
-    * @param log A logger.
-    * @return (stdout,stderr,success) triples
+    * A process is considered successful if its exit code is 0 and the error
+    * stream is empty. The latter criterion can be disabled with the
+    * unsuccessfulOnErrorStream parameter.
+    * @param pb
+    *   The process description.
+    * @param unsuccessfulOnErrorStream
+    *   if true, then the process is considered as a failure if its stderr is
+    *   not empty.
+    * @param atMost
+    *   max waiting time.
+    * @param log
+    *   A logger.
+    * @return
+    *   (stdout,stderr,success) triples
     */
   def execGetStreamsAndCodeWithLog(
       pb: ProcessBuilder,
