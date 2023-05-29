@@ -14,14 +14,14 @@ inThisBuild(
   )
 )
 
-scalaVersion := "2.13.7"
+scalaVersion := "2.13.10"
 
-crossScalaVersions := Seq("2.12.15", "2.13.7")
+crossScalaVersions := Seq("2.12.15", "2.13.10")
 
 name := "fileutils"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.2.10" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.15" % "test"
 )
 
 scalacOptions ++= Seq(
