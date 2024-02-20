@@ -21,7 +21,7 @@ crossScalaVersions := Seq("2.12.15", "2.13.10")
 name := "fileutils"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.2.15" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.18" % "test"
 )
 
 scalacOptions ++= Seq(
