@@ -14,9 +14,9 @@ inThisBuild(
   )
 )
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.13"
 
-crossScalaVersions := Seq("2.12.15", "2.13.10")
+crossScalaVersions := Seq("2.12.15", "2.13.13")
 
 name := "fileutils"
 
