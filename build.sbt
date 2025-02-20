@@ -29,4 +29,8 @@ scalacOptions ++= Seq(
   "-feature"
 )
 
-mimaPreviousArtifacts := Set(organization.value %% moduleName.value % "1.2.5").take(0)
+mimaPreviousArtifacts := Set(organization.value %% moduleName.value % "1.2.5").take(CrossVersion
+      .partialVersion(scalaVersion.value) match {
+        case Some((2, _)) => 1
+        case Some((3,_)) => 0
+      })
