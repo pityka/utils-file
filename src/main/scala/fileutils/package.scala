@@ -428,7 +428,7 @@ package object fileutils {
       atMost: Duration = Duration.Inf,
       retries: Int = 0
   )(
-      stdOutFunc: String => Unit = { x: String => }
+      stdOutFunc: String => Unit = { (x: String) => ()}
   )(implicit stdErrFunc: String => Unit = (x: String) => ()): Int = {
 
     import scala.util._

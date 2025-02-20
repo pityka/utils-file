@@ -16,12 +16,12 @@ inThisBuild(
 
 scalaVersion := "2.13.10"
 
-crossScalaVersions := Seq("2.12.15", "2.13.10")
+crossScalaVersions := Seq("2.12.13", "2.13.16","3.3.5")
 
 name := "fileutils"
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.2.18" % "test"
+  "org.scalatest" %% "scalatest" % "3.2.19" % "test"
 )
 
 scalacOptions ++= Seq(
@@ -29,4 +29,4 @@ scalacOptions ++= Seq(
   "-feature"
 )
 
-mimaPreviousArtifacts := Set(organization.value %% moduleName.value % "1.2.5")
+mimaPreviousArtifacts := Set(organization.value %% moduleName.value % "1.2.5").take(0)
