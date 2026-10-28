@@ -16,7 +16,7 @@ inThisBuild(
 
 scalaVersion := "2.13.10"
 
-crossScalaVersions := Seq("2.12.13", "2.13.16","3.3.5")
+crossScalaVersions := Seq("2.12.13", "2.13.16", "3.3.9")
 
 name := "fileutils"
 
@@ -29,8 +29,11 @@ scalacOptions ++= Seq(
   "-feature"
 )
 
-mimaPreviousArtifacts := Set(organization.value %% moduleName.value % "1.2.5").take(CrossVersion
+mimaPreviousArtifacts := Set(organization.value %% moduleName.value % "1.2.5")
+  .take(
+    CrossVersion
       .partialVersion(scalaVersion.value) match {
-        case Some((2, _)) => 1
-        case Some((3,_)) => 0
-      })
+      case Some((2, _)) => 1
+      case Some((3, _)) => 0
+    }
+  )
